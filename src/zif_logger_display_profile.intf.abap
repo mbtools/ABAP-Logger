@@ -9,30 +9,30 @@ INTERFACE zif_logger_display_profile
       i_single_log TYPE clike OPTIONAL
       i_standard   TYPE clike DEFAULT abap_true
     RETURNING
-      VALUE(r_self) TYPE REF TO zif_logger_display_profile.
+      VALUE(result) TYPE REF TO zif_logger_display_profile.
   METHODS get
     RETURNING
-      VALUE(r_display_profile) TYPE bal_s_prof.
+      VALUE(result) TYPE bal_s_prof.
   METHODS set_grid
     IMPORTING
       i_grid_mode  TYPE clike
     RETURNING
-      VALUE(r_self) TYPE REF TO zif_logger_display_profile.
+      VALUE(result) TYPE REF TO zif_logger_display_profile.
   METHODS set_value
     IMPORTING
       i_fld        TYPE clike
       i_val        TYPE any
     RETURNING
-      VALUE(r_self) TYPE REF TO zif_logger_display_profile.
+      VALUE(result) TYPE REF TO zif_logger_display_profile.
   METHODS set_context_tree
     IMPORTING
       i_context_structure TYPE clike
       i_under_log         TYPE clike DEFAULT space
     RETURNING
-      VALUE(r_self) TYPE REF TO zif_logger_display_profile.
+      VALUE(result) TYPE REF TO zif_logger_display_profile.
   METHODS set_context_message
     IMPORTING
       i_context_structure TYPE clike
     RETURNING
-      VALUE(r_self) TYPE REF TO zif_logger_display_profile.
+      VALUE(result) TYPE REF TO zif_logger_display_profile.
 ENDINTERFACE.

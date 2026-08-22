@@ -14,7 +14,7 @@ CLASS zcl_logger_display_profile DEFINITION
       IMPORTING
         i_structure_name    TYPE clike
       RETURNING
-        VALUE(r_components) TYPE cl_abap_structdescr=>component_table.
+        VALUE(result) TYPE cl_abap_structdescr=>component_table.
 ENDCLASS.
 
 
@@ -24,11 +24,11 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
   METHOD get_structure_components.
     DATA strucdescr TYPE REF TO cl_abap_structdescr.
     strucdescr ?= cl_abap_structdescr=>describe_by_name( i_structure_name ).
-    r_components = strucdescr->get_components( ).
+    result = strucdescr->get_components( ).
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~get.
-    r_display_profile = display_profile.
+    result = display_profile.
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~set.
@@ -55,7 +55,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
             e_s_display_profile = display_profile.
     ENDCASE.
 
-    r_self = me.
+    result = me.
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~set_context_message.
@@ -79,7 +79,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
 
     ENDLOOP.
 
-    r_self = me.
+    result = me.
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~set_context_tree.
@@ -148,7 +148,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     lev_sort-spos      = 1.
     APPEND lev_sort TO <lev2_sort>.
 
-    r_self = me.
+    result = me.
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~set_grid.
@@ -156,7 +156,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
       i_fld = 'USE_GRID'
       i_val = i_grid_mode ).
 
-    r_self = me.
+    result = me.
   ENDMETHOD.
 
   METHOD zif_logger_display_profile~set_value.
@@ -164,9 +164,9 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     ASSIGN COMPONENT i_fld OF STRUCTURE display_profile TO <value>.
     IF sy-subrc = 0.
       <value> = i_val.
-      r_self = me.
+      result = me.
     ELSE.
-      RAISE EXCEPTION TYPE zcx_logger_display_profile
+      RAISE EXCEPTION TYPE zcx_logger
         EXPORTING
           info = |field { i_fld } does not exist| ##NO_TEXT.
     ENDIF.

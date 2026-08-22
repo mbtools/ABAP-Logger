@@ -13,13 +13,13 @@ CLASS zcl_logger_collection DEFINITION
       loggers TYPE STANDARD TABLE OF REF TO zif_logger WITH DEFAULT KEY.
     METHODS get_log_handles
       RETURNING
-        VALUE(r_return) TYPE bal_t_logh.
+        VALUE(result) TYPE bal_t_logh.
     METHODS get_display_profile
       IMPORTING
         display_profile_head_size TYPE i
         display_profile_tree_size TYPE i
       RETURNING
-        VALUE(r_return)           TYPE bal_s_prof.
+        VALUE(result)           TYPE bal_s_prof.
 
 ENDCLASS.
 
@@ -62,20 +62,20 @@ CLASS zcl_logger_collection IMPLEMENTATION.
   METHOD get_log_handles.
     DATA logger TYPE REF TO zif_logger.
     LOOP AT loggers INTO logger.
-      INSERT logger->get_handle( ) INTO TABLE r_return.
+      INSERT logger->get_handle( ) INTO TABLE result.
     ENDLOOP.
   ENDMETHOD.
 
   METHOD get_display_profile.
     CALL FUNCTION 'BAL_DSP_PROFILE_STANDARD_GET'
       IMPORTING
-        e_s_display_profile = r_return.
+        e_s_display_profile = result.
 
-    r_return-head_size = display_profile_head_size.
-    r_return-tree_size = display_profile_tree_size.
+    result-head_size = display_profile_head_size.
+    result-tree_size = display_profile_tree_size.
     "interesting fact - I can't remember why I needed to move the hidden columns....
-    IF r_return-mess_fcat IS NOT INITIAL.
-      SORT r_return-mess_fcat BY no_out ASCENDING col_pos DESCENDING.
+    IF result-mess_fcat IS NOT INITIAL.
+      SORT result-mess_fcat BY no_out ASCENDING col_pos DESCENDING.
     ENDIF.
   ENDMETHOD.
 

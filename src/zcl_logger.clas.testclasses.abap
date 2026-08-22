@@ -37,7 +37,7 @@ CLASS lcl_test DEFINITION FOR TESTING
       teardown,
       get_first_message
         IMPORTING log_handle TYPE balloghndl
-        RETURNING VALUE(msg) TYPE char255,
+        RETURNING VALUE(result) TYPE char255,
       get_messages
         IMPORTING
           log_handle  TYPE balloghndl
@@ -52,7 +52,7 @@ CLASS lcl_test DEFINITION FOR TESTING
                   v2         LIKE sy-msgv2 DEFAULT sy-msgv2
                   v3         LIKE sy-msgv3 DEFAULT sy-msgv3
                   v4         LIKE sy-msgv4 DEFAULT sy-msgv4
-        RETURNING VALUE(msg) TYPE string,
+        RETURNING VALUE(result) TYPE string,
 
       can_create_anon_log FOR TESTING,
       can_create_named_log FOR TESTING,
@@ -1359,7 +1359,7 @@ CLASS lcl_test IMPLEMENTATION.
       EXPORTING
         i_s_msg_handle = msg_handle
       IMPORTING
-        e_txt_msg      = msg.
+        e_txt_msg      = result.
   ENDMETHOD.
 
   METHOD get_messages.
@@ -1420,7 +1420,7 @@ CLASS lcl_test IMPLEMENTATION.
         v3        = v3
         v4        = v4
       IMPORTING
-        msg       = msg
+        msg       = result
       EXCEPTIONS
         not_found = 1
         OTHERS    = 2.

@@ -11,7 +11,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS exit
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -23,7 +23,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS abend
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -35,7 +35,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS error
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -47,7 +47,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS warning
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -59,7 +59,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS info
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -71,7 +71,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS success
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -83,7 +83,7 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS trace
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
@@ -95,19 +95,19 @@ INTERFACE zif_logger
               importance          TYPE balprobcl OPTIONAL
               detlevel            TYPE ballevel  OPTIONAL
         PREFERRED PARAMETER obj_to_log
-    RETURNING VALUE(self)         TYPE REF TO zif_logger.
+    RETURNING VALUE(result)         TYPE REF TO zif_logger.
 
   METHODS has_errors
-    RETURNING VALUE(rv_yes) TYPE abap_bool.
+    RETURNING VALUE(result) TYPE abap_bool.
 
   METHODS has_warnings
-    RETURNING VALUE(rv_yes) TYPE abap_bool.
+    RETURNING VALUE(result) TYPE abap_bool.
 
   METHODS is_empty
-    RETURNING VALUE(rv_yes) TYPE abap_bool.
+    RETURNING VALUE(result) TYPE abap_bool.
 
   METHODS length
-    RETURNING VALUE(rv_length) TYPE i.
+    RETURNING VALUE(result) TYPE i.
 
   "! Saves the log on demand. Intended to be called at the
   "! end of the log processing so that logs can be saved depending
@@ -118,7 +118,7 @@ INTERFACE zif_logger
   METHODS save.
 
   METHODS export_to_table
-    RETURNING VALUE(rt_bapiret) TYPE bapirettab.
+    RETURNING VALUE(result) TYPE bapirettab.
 
   METHODS get_handle
     RETURNING VALUE(result) TYPE balloghndl.
@@ -131,7 +131,7 @@ INTERFACE zif_logger
 
   METHODS set_header
     IMPORTING !description TYPE bal_s_log-extnumber
-    RETURNING VALUE(self)  TYPE REF TO zif_logger.
+    RETURNING VALUE(result)  TYPE REF TO zif_logger.
 
   METHODS free.
 
