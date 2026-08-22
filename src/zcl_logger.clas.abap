@@ -185,22 +185,22 @@ CLASS zcl_logger IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD add_exception.
-    DATA result         TYPE bal_s_msg.
-    DATA l_t100key            TYPE scx_t100key.
-    DATA l_inc                TYPE i.
-    DATA l_textid             TYPE sotr_conc.
-    DATA l_substitution_table TYPE sotr_params.
+    DATA message            TYPE bal_s_msg.
+    DATA text_key           TYPE scx_t100key.
+    DATA index              TYPE i.
+    DATA text_id            TYPE sotr_conc.
+    DATA substitution_table TYPE sotr_params.
 
-    FIELD-SYMBOLS <l_attr>         TYPE scx_t100key-attr1.
-    FIELD-SYMBOLS <l_msgv>         TYPE bal_s_msg-msgv1.
-    FIELD-SYMBOLS <l_substitution> TYPE sotr_param.
+    FIELD-SYMBOLS <attribute>    TYPE scx_t100key-attr1.
+    FIELD-SYMBOLS <message_value> TYPE bal_s_msg-msgv1.
+    FIELD-SYMBOLS <substitution> TYPE sotr_param.
 
     " exception -> type OTR-message or T100-message?
     cl_message_helper=>check_msg_kind( EXPORTING msg     = exception_data-exception
-                                       IMPORTING t100key = l_t100key
-                                                 textid  = l_textid ).
+                                       IMPORTING t100key = text_key
+                                                 textid  = text_id ).
 
-    IF l_textid IS NOT INITIAL.
+    IF text_id IS NOT INITIAL.
       " If it is a OTR-message
       CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
         EXPORTING i_log_handle = handle
@@ -210,37 +210,37 @@ CLASS zcl_logger IMPLEMENTATION.
 
     " get the parameter for text switching
     cl_message_helper=>get_text_params( EXPORTING obj    = exception_data-exception
-                                        IMPORTING params = l_substitution_table ).
+                                        IMPORTING params = substitution_table ).
 
     " exception with T100 message
-    result-msgid = l_t100key-msgid.
-    result-msgno = l_t100key-msgno.
+    message-msgid = text_key-msgid.
+    message-msgno = text_key-msgno.
 
     DO 4 TIMES.
-      l_inc = sy-index - 1.
-      ASSIGN l_t100key-attr1 INCREMENT l_inc TO <l_attr> RANGE l_t100key.
-      IF sy-subrc = 0 AND <l_attr> IS NOT INITIAL.
-        READ TABLE l_substitution_table ASSIGNING <l_substitution> WITH KEY param = <l_attr>.
-        IF sy-subrc = 0 AND <l_substitution>-value IS NOT INITIAL.
-          ASSIGN result-msgv1 INCREMENT l_inc TO <l_msgv> RANGE result.
+      index = sy-index - 1.
+      ASSIGN text_key-attr1 INCREMENT index TO <attribute> RANGE text_key.
+      IF sy-subrc = 0 AND <attribute> IS NOT INITIAL.
+        READ TABLE substitution_table ASSIGNING <substitution> WITH KEY param = <attribute>.
+        IF sy-subrc = 0 AND <substitution>-value IS NOT INITIAL.
+          ASSIGN message-msgv1 INCREMENT index TO <message_value> RANGE message.
           IF sy-subrc = 0.
-            <l_msgv> = <l_substitution>-value.
+            <message_value> = <substitution>-value.
           ENDIF.
         ENDIF.
       ENDIF.
     ENDDO.
 
-    result-msgty     = exception_data-msgty.
-    result-probclass = exception_data-probclass.
-    result-detlevel  = exception_data-detlevel.
-    result-time_stmp = exception_data-time_stmp.
-    result-alsort    = exception_data-alsort.
-    result-context   = formatted_context.
-    result-params    = formatted_params.
+    message-msgty     = exception_data-msgty.
+    message-probclass = exception_data-probclass.
+    message-detlevel  = exception_data-detlevel.
+    message-time_stmp = exception_data-time_stmp.
+    message-alsort    = exception_data-alsort.
+    message-context   = formatted_context.
+    message-params    = formatted_params.
 
     CALL FUNCTION 'BAL_LOG_MSG_ADD'
       EXPORTING i_log_handle = handle
-                i_s_msg      = result.
+                i_s_msg      = message.
   ENDMETHOD.
 
   METHOD add_sprot_msg.
