@@ -11,7 +11,7 @@ CLASS zcl_logger_factory DEFINITION
       IMPORTING
         object       TYPE csequence OPTIONAL
         subobject    TYPE csequence OPTIONAL
-        desc         TYPE csequence OPTIONAL
+        extnumber    TYPE csequence OPTIONAL
         context      TYPE any OPTIONAL
         settings     TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
@@ -22,7 +22,7 @@ CLASS zcl_logger_factory DEFINITION
       IMPORTING
         object                   TYPE csequence
         subobject                TYPE csequence
-        desc                     TYPE csequence OPTIONAL
+        extnumber                TYPE csequence OPTIONAL
         create_if_does_not_exist TYPE abap_bool DEFAULT abap_false
         settings                 TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
@@ -37,6 +37,10 @@ CLASS zcl_logger_factory DEFINITION
     CLASS-METHODS create_collection
       RETURNING
         VALUE(r_collection) TYPE REF TO zif_logger_collection.
+
+    CLASS-METHODS create_ui
+      RETURNING
+        VALUE(result) TYPE REF TO zif_logger_ui.
 
     CLASS-METHODS create_display_profile
       IMPORTING
@@ -65,13 +69,14 @@ CLASS zcl_logger_factory DEFINITION
       log_logger          TYPE REF TO zif_logger,
       log_settings        TYPE REF TO zif_logger_settings,
       log_collection      TYPE REF TO zif_logger_collection,
+      log_ui              TYPE REF TO zif_logger_ui,
       log_display_profile TYPE REF TO zif_logger_display_profile.
 
     CLASS-METHODS find_log_headers
       IMPORTING
         object                 TYPE csequence OPTIONAL
         subobject              TYPE csequence OPTIONAL
-        desc                   TYPE csequence OPTIONAL
+        extnumber              TYPE csequence OPTIONAL
         db_number              TYPE balognr OPTIONAL
       RETURNING
         VALUE(r_found_headers) TYPE balhdr_t.
@@ -113,6 +118,13 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       i_standard    = i_standard ).
   ENDMETHOD.
 
+  METHOD create_ui.
+    IF log_ui IS INITIAL.
+      CREATE OBJECT log_ui TYPE zcl_logger_ui.
+    ENDIF.
+    result = log_ui.
+  ENDMETHOD.
+
 
   METHOD create_log.
     FIELD-SYMBOLS <context_val> TYPE c.
@@ -127,7 +139,7 @@ CLASS zcl_logger_factory IMPLEMENTATION.
 
     lo_log->header-object    = object.
     lo_log->header-subobject = subobject.
-    lo_log->header-extnumber = desc.
+    lo_log->header-extnumber = extnumber.
 
     IF settings IS BOUND.
       lo_log->settings = settings.
@@ -182,13 +194,13 @@ CLASS zcl_logger_factory IMPLEMENTATION.
     DATA: found_headers      TYPE balhdr_t,
           most_recent_header TYPE balhdr.
 
-    found_headers = find_log_headers( object = object subobject = subobject desc = desc ).
+    found_headers = find_log_headers( object = object subobject = subobject extnumber = extnumber ).
 
     IF lines( found_headers ) = 0 .
       IF create_if_does_not_exist = abap_true.
         r_log = create_log( object    = object
                             subobject = subobject
-                            desc      = desc
+                            extnumber = extnumber
                             settings  = settings ).
       ENDIF.
       RETURN.
@@ -222,12 +234,12 @@ CLASS zcl_logger_factory IMPLEMENTATION.
     DATA: filter      TYPE bal_s_lfil,
           l_object    TYPE balobj_d,
           l_subobject TYPE balsubobj,
-          extnumber   TYPE balnrext,
+          l_extnumber TYPE balnrext,
           log_numbers TYPE bal_t_logn.
 
     l_object    = object.
     l_subobject = subobject.
-    extnumber   = desc.
+    l_extnumber = extnumber.
     IF db_number IS SUPPLIED.
       INSERT db_number INTO TABLE log_numbers.
     ENDIF.
@@ -236,7 +248,7 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       EXPORTING
         i_object       = l_object
         i_subobject    = l_subobject
-        i_extnumber    = extnumber
+        i_extnumber    = l_extnumber
         i_t_lognumber  = log_numbers
       IMPORTING
         e_s_log_filter = filter.

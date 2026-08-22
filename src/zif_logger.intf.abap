@@ -1,18 +1,5 @@
 INTERFACE zif_logger
   PUBLIC.
-  DATA handle         TYPE balloghndl READ-ONLY.
-  DATA db_number      TYPE balognr    READ-ONLY.
-  DATA header         TYPE bal_s_log  READ-ONLY.
-  DATA control_handle TYPE balcnthndl READ-ONLY.
-
-  INTERFACES zif_logger_deprecated.
-
-  ALIASES a FOR zif_logger_deprecated~a.
-  ALIASES e FOR zif_logger_deprecated~e.
-  ALIASES w FOR zif_logger_deprecated~w.
-  ALIASES i FOR zif_logger_deprecated~i.
-  ALIASES s FOR zif_logger_deprecated~s.
-
   METHODS add
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
               !context            TYPE any       OPTIONAL
@@ -98,7 +85,7 @@ INTERFACE zif_logger
         PREFERRED PARAMETER obj_to_log
     RETURNING VALUE(self)         TYPE REF TO zif_logger.
 
-  METHODS debug
+  METHODS trace
     IMPORTING obj_to_log          TYPE any       DEFAULT sy
               !context            TYPE any       OPTIONAL
               callback_form       TYPE csequence OPTIONAL
@@ -133,20 +120,14 @@ INTERFACE zif_logger
   METHODS export_to_table
     RETURNING VALUE(rt_bapiret) TYPE bapirettab.
 
-  METHODS fullscreen. " deprecated, use display_fullscreen
+  METHODS get_handle
+    RETURNING VALUE(result) TYPE balloghndl.
 
-  METHODS display_fullscreen
-    IMPORTING profile TYPE bal_s_prof OPTIONAL.
+  METHODS get_db_number
+    RETURNING VALUE(result) TYPE balognr.
 
-  METHODS popup " deprecated, use display_as_popup
-    IMPORTING profile TYPE bal_s_prof OPTIONAL.
-
-  METHODS display_as_popup
-    IMPORTING profile TYPE bal_s_prof OPTIONAL.
-
-  METHODS display_in_container
-    IMPORTING container TYPE REF TO cl_gui_container
-              profile   TYPE bal_s_prof OPTIONAL.
+  METHODS get_header
+    RETURNING VALUE(result) TYPE bal_s_log.
 
   METHODS set_header
     IMPORTING !description TYPE bal_s_log-extnumber

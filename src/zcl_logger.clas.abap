@@ -5,71 +5,11 @@ CLASS zcl_logger DEFINITION
 
   PUBLIC SECTION.
     INTERFACES zif_logger.
-    INTERFACES zif_loggable_object.
+    INTERFACES zif_logger_log_object.
 
-    ALIASES add                  FOR zif_logger~add.
-    ALIASES a                    FOR zif_logger~a.
-    ALIASES e                    FOR zif_logger~e.
-    ALIASES w                    FOR zif_logger~w.
-    ALIASES i                    FOR zif_logger~i.
-    ALIASES s                    FOR zif_logger~s.
-    ALIASES has_errors           FOR zif_logger~has_errors.
-    ALIASES has_warnings         FOR zif_logger~has_warnings.
-    ALIASES is_empty             FOR zif_logger~is_empty.
-    ALIASES length               FOR zif_logger~length.
-    ALIASES save                 FOR zif_logger~save.
-    ALIASES export_to_table      FOR zif_logger~export_to_table.
-    ALIASES fullscreen           FOR zif_logger~fullscreen.
-    ALIASES display_fullscreen   FOR zif_logger~display_fullscreen.
-    ALIASES popup                FOR zif_logger~popup.
-    ALIASES display_as_popup     FOR zif_logger~display_as_popup.
-    ALIASES handle               FOR zif_logger~handle.
-    ALIASES control_handle       FOR zif_logger~control_handle.
-    ALIASES display_in_container FOR zif_logger~display_in_container.
-    ALIASES db_number            FOR zif_logger~db_number.
-    ALIASES header               FOR zif_logger~header.
-    ALIASES set_header           FOR zif_logger~set_header.
-    ALIASES free                 FOR zif_logger~free.
-    ALIASES ty_symsg             FOR zif_loggable_object~ty_symsg.
-    ALIASES ty_message           FOR zif_loggable_object~ty_message.
-    ALIASES tty_messages         FOR zif_loggable_object~tty_messages.
-    ALIASES get_message_table    FOR zif_loggable_object~get_message_table.
-
-    "! Starts a new log.
-    "! For backwards compatibility only! Use ZCL_LOGGER_FACTORY instead.
-    "!
-    "! @parameter object |
-    "! @parameter subobject |
-    "! @parameter desc |
-    "! @parameter context |
-    "! @parameter auto_save |
-    "! @parameter second_db_conn |
-    "! @parameter r_log |
-    CLASS-METHODS new
-      IMPORTING !object        TYPE csequence OPTIONAL
-                subobject      TYPE csequence OPTIONAL
-                desc           TYPE csequence OPTIONAL
-                !context       TYPE any       OPTIONAL
-                auto_save      TYPE abap_bool OPTIONAL
-                second_db_conn TYPE abap_bool DEFAULT abap_true
-      RETURNING VALUE(r_log)   TYPE REF TO zcl_logger.
-
-    "! Reopens an already existing log.
-    "! For backwards compatibility only! Use ZCL_LOGGER_FACTORY instead.
-    "!
-    "! @parameter object |
-    "! @parameter subobject |
-    "! @parameter desc |
-    "! @parameter create_if_does_not_exist |
-    "! @parameter auto_save |
-    "! @parameter r_log |
-    CLASS-METHODS open
-      IMPORTING !object                  TYPE csequence
-                subobject                TYPE csequence
-                desc                     TYPE csequence OPTIONAL
-                create_if_does_not_exist TYPE abap_bool DEFAULT abap_false
-                auto_save                TYPE abap_bool OPTIONAL
-      RETURNING VALUE(r_log)             TYPE REF TO zcl_logger.
+    DATA handle    TYPE balloghndl READ-ONLY.
+    DATA db_number TYPE balognr    READ-ONLY.
+    DATA header    TYPE bal_s_log  READ-ONLY.
 
   PROTECTED SECTION.
 
@@ -328,7 +268,7 @@ CLASS zcl_logger IMPLEMENTATION.
 
     msg_struct_type ?= cl_abap_typedescr=>describe_by_data( obj_to_log ).
     components = msg_struct_type->components.
-    add( '--- Begin of structure ---' ).
+    zif_logger~add( '--- Begin of structure ---' ).
     LOOP AT components INTO component.
       component_name = component-name.
       ASSIGN COMPONENT component_name OF STRUCTURE obj_to_log TO <component>.
@@ -344,7 +284,7 @@ CLASS zcl_logger IMPLEMENTATION.
       msg_type = cl_abap_typedescr=>describe_by_data( <component> ).
       IF msg_type->kind = cl_abap_typedescr=>kind_elem.
         string_to_log = |{ to_lower( component_name ) } = { <component> }|.
-        add( string_to_log ).
+        zif_logger~add( string_to_log ).
       ELSEIF msg_type->kind = cl_abap_typedescr=>kind_struct.
         self = add_structure( obj_to_log    = <component>
                               context       = context
@@ -356,7 +296,7 @@ CLASS zcl_logger IMPLEMENTATION.
                               detlevel      = detlevel ).
       ENDIF.
     ENDLOOP.
-    add( '--- End of structure ---' ).
+    zif_logger~add( '--- End of structure ---' ).
   ENDMETHOD.
 
   METHOD add_syst_msg.
@@ -489,41 +429,6 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD new.
-    IF auto_save IS SUPPLIED.
-      r_log ?= zcl_logger_factory=>create_log( object    = object
-                                               subobject = subobject
-                                               desc      = desc
-                                               context   = context
-                                               settings  = zcl_logger_factory=>create_settings(
-                                                  )->set_usage_of_secondary_db_conn( second_db_conn
-                                                  )->set_autosave( auto_save ) ).
-    ELSE.
-      r_log ?= zcl_logger_factory=>create_log( object    = object
-                                               subobject = subobject
-                                               desc      = desc
-                                               context   = context
-                                               settings  = zcl_logger_factory=>create_settings(
-                                                  )->set_usage_of_secondary_db_conn( second_db_conn ) ).
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD open.
-    IF auto_save IS SUPPLIED.
-      r_log ?= zcl_logger_factory=>open_log( object                   = object
-                                             subobject                = subobject
-                                             desc                     = desc
-                                             create_if_does_not_exist = create_if_does_not_exist
-                                             settings                 = zcl_logger_factory=>create_settings(
-                                                               )->set_autosave( auto_save ) ).
-    ELSE.
-      r_log ?= zcl_logger_factory=>open_log( object                   = object
-                                             subobject                = subobject
-                                             desc                     = desc
-                                             create_if_does_not_exist = create_if_does_not_exist ).
-    ENDIF.
-  ENDMETHOD.
-
   METHOD save_log.
     DATA log_handles       TYPE bal_t_logh.
     DATA log_numbers       TYPE bal_t_lgnm.
@@ -550,10 +455,10 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD zif_loggable_object~get_message_table.
+  METHOD zif_logger_log_object~get_message_table.
     DATA message_handles TYPE bal_t_msgh.
     DATA message         TYPE bal_s_msg.
-    DATA message_result  TYPE zif_loggable_object~ty_message.
+    DATA message_result  TYPE zif_logger_log_object~ty_message.
 
     FIELD-SYMBOLS <msg_handle> TYPE balmsghndl.
 
@@ -572,24 +477,14 @@ CLASS zcl_logger IMPLEMENTATION.
         message_result-symsg-msgv2 = message-msgv2.
         message_result-symsg-msgv3 = message-msgv3.
         message_result-symsg-msgv4 = message-msgv4.
-        APPEND message_result TO r_result.
+        APPEND message_result TO result.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD zif_logger_deprecated~a.
-    self = zif_logger~abend( obj_to_log          = obj_to_log
-                             context             = context
-                             callback_form       = callback_form
-                             callback_prog       = callback_prog
-                             callback_fm         = callback_fm
-                             callback_parameters = callback_parameters
-                             importance          = importance
-                             detlevel            = detlevel ).
-  ENDMETHOD.
 
   METHOD zif_logger~abend.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -614,13 +509,13 @@ CLASS zcl_logger IMPLEMENTATION.
     " these objects could be moved into their own method
     " see adt://***/sap/bc/adt/oo/classes/zcl_logger/source/main#start=391,10;end=415,61
     DATA symsg                    TYPE symsg.
-    DATA loggable                 TYPE REF TO zif_loggable_object.
-    DATA loggable_object_messages TYPE zif_loggable_object=>tty_messages.
+    DATA loggable                 TYPE REF TO zif_logger_log_object.
+    DATA loggable_object_messages TYPE zif_logger_log_object=>tty_messages.
 
     FIELD-SYMBOLS <table_of_messages>       TYPE ANY TABLE.
     FIELD-SYMBOLS <message_line>            TYPE any.
     FIELD-SYMBOLS <context_val>             TYPE any.
-    FIELD-SYMBOLS <loggable_object_message> TYPE zif_loggable_object=>ty_message.
+    FIELD-SYMBOLS <loggable_object_message> TYPE zif_logger_log_object=>ty_message.
 
     " Remember system message since it might get changed inadvertently
     IF context IS NOT INITIAL.
@@ -789,83 +684,8 @@ CLASS zcl_logger IMPLEMENTATION.
     self = me.
   ENDMETHOD.
 
-  METHOD zif_logger~display_as_popup.
-    " See SBAL_DEMO_04_POPUP for ideas
-    DATA relevant_profile TYPE bal_s_prof.
-    DATA log_handles      TYPE bal_t_logh.
-
-    INSERT handle INTO TABLE log_handles.
-
-    IF profile IS SUPPLIED AND profile IS NOT INITIAL.
-      relevant_profile = profile.
-    ELSE.
-      CALL FUNCTION 'BAL_DSP_PROFILE_POPUP_GET'
-        IMPORTING e_s_display_profile = relevant_profile.
-    ENDIF.
-
-    CALL FUNCTION 'BAL_DSP_LOG_DISPLAY'
-      EXPORTING i_s_display_profile = relevant_profile
-                i_t_log_handle      = log_handles.
-  ENDMETHOD.
-
-  METHOD zif_logger~display_fullscreen.
-    DATA relevant_profile TYPE bal_s_prof.
-    DATA log_handles      TYPE bal_t_logh.
-
-    INSERT handle INTO TABLE log_handles.
-
-    IF profile IS SUPPLIED AND profile IS NOT INITIAL.
-      relevant_profile = profile.
-    ELSE.
-      CALL FUNCTION 'BAL_DSP_PROFILE_SINGLE_LOG_GET'
-        IMPORTING e_s_display_profile = relevant_profile.
-    ENDIF.
-
-    CALL FUNCTION 'BAL_DSP_LOG_DISPLAY'
-      EXPORTING i_s_display_profile = relevant_profile
-                i_t_log_handle      = log_handles.
-  ENDMETHOD.
-
-  METHOD zif_logger~display_in_container.
-    DATA relevant_profile TYPE bal_s_prof.
-    DATA log_handles      TYPE bal_t_logh.
-
-    INSERT handle INTO TABLE log_handles.
-
-    IF control_handle IS INITIAL.
-
-      IF profile IS SUPPLIED AND profile IS NOT INITIAL.
-        relevant_profile = profile.
-      ELSE.
-        CALL FUNCTION 'BAL_DSP_PROFILE_NO_TREE_GET'
-          IMPORTING e_s_display_profile = relevant_profile.
-      ENDIF.
-
-      " create control to display log
-      CALL FUNCTION 'BAL_CNTL_CREATE'
-        EXPORTING  i_container          = container
-                   i_s_display_profile  = relevant_profile
-                   i_t_log_handle       = log_handles
-        IMPORTING  e_control_handle     = control_handle
-        EXCEPTIONS profile_inconsistent = 1
-                   internal_error       = 2.
-      ASSERT sy-subrc = 0.
-
-    ELSE.
-
-      " refresh control
-      CALL FUNCTION 'BAL_CNTL_REFRESH'
-        EXPORTING  i_control_handle  = control_handle
-                   i_t_log_handle    = log_handles
-        EXCEPTIONS control_not_found = 1
-                   internal_error    = 2.
-      ASSERT sy-subrc = 0.
-
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD zif_logger~debug.
-    self = add( obj_to_log          = obj_to_log
+  METHOD zif_logger~trace.
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -876,19 +696,9 @@ CLASS zcl_logger IMPLEMENTATION.
                 detlevel            = detlevel ).
   ENDMETHOD.
 
-  METHOD zif_logger_deprecated~e.
-    self = zif_logger~error( obj_to_log          = obj_to_log
-                             context             = context
-                             callback_form       = callback_form
-                             callback_prog       = callback_prog
-                             callback_fm         = callback_fm
-                             callback_parameters = callback_parameters
-                             importance          = importance
-                             detlevel            = detlevel ).
-  ENDMETHOD.
 
   METHOD zif_logger~error.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -900,7 +710,7 @@ CLASS zcl_logger IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_logger~exit.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -979,9 +789,16 @@ CLASS zcl_logger IMPLEMENTATION.
     ASSERT sy-subrc = 0.
   ENDMETHOD.
 
-  METHOD zif_logger~fullscreen.
-    " deprecated, use display_fullscreen
-    display_fullscreen( ).
+  METHOD zif_logger~get_db_number.
+    result = db_number.
+  ENDMETHOD.
+
+  METHOD zif_logger~get_handle.
+    result = handle.
+  ENDMETHOD.
+
+  METHOD zif_logger~get_header.
+    result = header.
   ENDMETHOD.
 
   METHOD zif_logger~has_errors.
@@ -992,19 +809,9 @@ CLASS zcl_logger IMPLEMENTATION.
     rv_yes = boolc( lines( get_message_handles( msgtype = 'W' ) ) > 0 ).
   ENDMETHOD.
 
-  METHOD zif_logger_deprecated~i.
-    self = zif_logger~info( obj_to_log          = obj_to_log
-                            context             = context
-                            callback_form       = callback_form
-                            callback_prog       = callback_prog
-                            callback_fm         = callback_fm
-                            callback_parameters = callback_parameters
-                            importance          = importance
-                            detlevel            = detlevel ).
-  ENDMETHOD.
 
   METHOD zif_logger~info.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -1016,31 +823,16 @@ CLASS zcl_logger IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_logger~is_empty.
-    rv_yes = boolc( length( ) = 0 ).
+    rv_yes = boolc( zif_logger~length( ) = 0 ).
   ENDMETHOD.
 
   METHOD zif_logger~length.
     rv_length = lines( get_message_handles( ) ).
   ENDMETHOD.
 
-  METHOD zif_logger~popup.
-    " deprecated, use display_as_popup
-    display_as_popup( profile ).
-  ENDMETHOD.
-
-  METHOD zif_logger_deprecated~s.
-    self = zif_logger~success( obj_to_log          = obj_to_log
-                               context             = context
-                               callback_form       = callback_form
-                               callback_prog       = callback_prog
-                               callback_fm         = callback_fm
-                               callback_parameters = callback_parameters
-                               importance          = importance
-                               detlevel            = detlevel ).
-  ENDMETHOD.
 
   METHOD zif_logger~success.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
@@ -1070,18 +862,8 @@ CLASS zcl_logger IMPLEMENTATION.
     self = me.
   ENDMETHOD.
 
-  METHOD zif_logger_deprecated~w.
-    self = zif_logger~warning( obj_to_log          = obj_to_log
-                               context             = context
-                               callback_form       = callback_form
-                               callback_prog       = callback_prog
-                               callback_fm         = callback_fm
-                               callback_parameters = callback_parameters
-                               importance          = importance
-                               detlevel            = detlevel ).
-  ENDMETHOD.
   METHOD zif_logger~warning.
-    self = add( obj_to_log          = obj_to_log
+    self = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
                 callback_form       = callback_form
                 callback_prog       = callback_prog
