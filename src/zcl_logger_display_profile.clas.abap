@@ -36,24 +36,38 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
       WHEN i_detlevel.
         CALL FUNCTION 'BAL_DSP_PROFILE_DETLEVEL_GET'
           IMPORTING
-            e_s_display_profile = display_profile.
+            e_s_display_profile = display_profile
+          EXCEPTIONS
+            OTHERS              = 1.
       WHEN i_no_tree.
         CALL FUNCTION 'BAL_DSP_PROFILE_NO_TREE_GET'
           IMPORTING
-            e_s_display_profile = display_profile.
+            e_s_display_profile = display_profile
+          EXCEPTIONS
+            OTHERS              = 1.
       WHEN i_popup.
         CALL FUNCTION 'BAL_DSP_PROFILE_POPUP_GET'
           IMPORTING
-            e_s_display_profile = display_profile.
+            e_s_display_profile = display_profile
+          EXCEPTIONS
+            OTHERS              = 1.
       WHEN i_single_log.
         CALL FUNCTION 'BAL_DSP_PROFILE_SINGLE_LOG_GET'
           IMPORTING
-            e_s_display_profile = display_profile.
+            e_s_display_profile = display_profile
+          EXCEPTIONS
+            OTHERS              = 1.
       WHEN OTHERS.
         CALL FUNCTION 'BAL_DSP_PROFILE_STANDARD_GET'
           IMPORTING
-            e_s_display_profile = display_profile.
+            e_s_display_profile = display_profile
+          EXCEPTIONS
+            OTHERS              = 1.
     ENDCASE.
+
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     result = me.
   ENDMETHOD.

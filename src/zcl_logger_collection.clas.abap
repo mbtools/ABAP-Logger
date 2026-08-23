@@ -53,9 +53,7 @@ CLASS zcl_logger_collection IMPLEMENTATION.
         no_authority         = 4
         OTHERS               = 5.
     IF sy-subrc <> 0.
-      "Todo "Raise Exception Error?
-      MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno
-        WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4 DISPLAY LIKE sy-msgty.
+      RAISE EXCEPTION TYPE zcx_logger.
     ENDIF.
   ENDMETHOD.
 
@@ -69,7 +67,12 @@ CLASS zcl_logger_collection IMPLEMENTATION.
   METHOD get_display_profile.
     CALL FUNCTION 'BAL_DSP_PROFILE_STANDARD_GET'
       IMPORTING
-        e_s_display_profile = result.
+        e_s_display_profile = result
+      EXCEPTIONS
+        OTHERS              = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     result-head_size = display_profile_head_size.
     result-tree_size = display_profile_tree_size.

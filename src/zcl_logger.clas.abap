@@ -212,7 +212,11 @@ CLASS zcl_logger IMPLEMENTATION.
       " If it is a OTR-message
       CALL FUNCTION 'BAL_LOG_EXCEPTION_ADD'
         EXPORTING i_log_handle = handle
-                  i_s_exc      = exception_data.
+                  i_s_exc      = exception_data
+        EXCEPTIONS OTHERS      = 1.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_logger.
+      ENDIF.
       RETURN.
     ENDIF.
 
@@ -248,7 +252,11 @@ CLASS zcl_logger IMPLEMENTATION.
 
     CALL FUNCTION 'BAL_LOG_MSG_ADD'
       EXPORTING i_log_handle = handle
-                i_s_msg      = message.
+                i_s_msg      = message
+      EXCEPTIONS OTHERS      = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
   ENDMETHOD.
 
   METHOD add_sprot_msg.
@@ -371,7 +379,11 @@ CLASS zcl_logger IMPLEMENTATION.
       EXPORTING  i_t_log_handle = log_handle
                  i_s_msg_filter = filter
       IMPORTING  e_t_msg_handle = result
-      EXCEPTIONS msg_not_found  = 0.
+      EXCEPTIONS msg_not_found  = 0
+                 OTHERS         = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
   ENDMETHOD.
 
   METHOD get_struct_kind.
@@ -451,7 +463,11 @@ CLASS zcl_logger IMPLEMENTATION.
       EXPORTING i_t_log_handle       = log_handles
                 i_2th_connection     = secondary_db_conn
                 i_2th_connect_commit = secondary_db_conn
-      IMPORTING e_new_lognumbers     = log_numbers.
+      IMPORTING e_new_lognumbers     = log_numbers
+      EXCEPTIONS OTHERS              = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
     IF me->db_number IS INITIAL.
       READ TABLE log_numbers INDEX 1 INTO log_number.
       db_number = log_number-lognumber.
@@ -476,8 +492,13 @@ CLASS zcl_logger IMPLEMENTATION.
       CALL FUNCTION 'BAL_LOG_MSG_READ'
         EXPORTING  i_s_msg_handle = <msg_handle>
         IMPORTING  e_s_msg        = message
-        EXCEPTIONS OTHERS         = 3.
-      IF sy-subrc IS INITIAL.
+        EXCEPTIONS log_not_found  = 1
+                   msg_not_found  = 0
+                   OTHERS         = 2.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_logger.
+      ENDIF.
+      IF message IS NOT INITIAL.
         message_result-type = message-msgty.
         message_result-symsg-msgid = message-msgid.
         message_result-symsg-msgno = message-msgno.
@@ -655,7 +676,8 @@ CLASS zcl_logger IMPLEMENTATION.
                       i_text       = free_text_msg
                       i_s_context  = formatted_context
                       i_s_params   = formatted_params
-                      i_detlevel   = detlevel.
+                      i_detlevel   = detlevel
+            EXCEPTIONS OTHERS       = 1.
         CATCH cx_sy_dyn_call_param_not_found.
           CALL FUNCTION 'BAL_LOG_MSG_ADD_FREE_TEXT'
             EXPORTING i_log_handle = me->handle
@@ -663,8 +685,12 @@ CLASS zcl_logger IMPLEMENTATION.
                       i_probclass  = importance
                       i_text       = free_text_msg
                       i_s_context  = formatted_context
-                      i_s_params   = formatted_params.
+                      i_s_params   = formatted_params
+            EXCEPTIONS OTHERS       = 1.
       ENDTRY.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_logger.
+      ENDIF.
     ELSEIF exception_data_table IS NOT INITIAL.
       FIELD-SYMBOLS <exception_data> LIKE LINE OF exception_data_table.
       LOOP AT exception_data_table ASSIGNING <exception_data>.
@@ -683,7 +709,11 @@ CLASS zcl_logger IMPLEMENTATION.
 
       CALL FUNCTION 'BAL_LOG_MSG_ADD'
         EXPORTING i_log_handle = me->handle
-                  i_s_msg      = message_to_add.
+                  i_s_msg      = message_to_add
+        EXCEPTIONS OTHERS      = 1.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_logger.
+      ENDIF.
     ENDIF.
 
     IF me->settings->get_autosave( ) = abap_true.
@@ -741,11 +771,17 @@ CLASS zcl_logger IMPLEMENTATION.
 
     LOOP AT message_handles ASSIGNING <msg_handle>.
       CLEAR bapiret2.
+      CLEAR message.
       CALL FUNCTION 'BAL_LOG_MSG_READ'
         EXPORTING  i_s_msg_handle = <msg_handle>
         IMPORTING  e_s_msg        = message
-        EXCEPTIONS OTHERS         = 3.
-      IF sy-subrc IS INITIAL.
+        EXCEPTIONS log_not_found  = 1
+                   msg_not_found  = 0
+                   OTHERS         = 2.
+      IF sy-subrc <> 0.
+        RAISE EXCEPTION TYPE zcx_logger.
+      ENDIF.
+      IF message IS NOT INITIAL.
         MESSAGE ID message-msgid
                 TYPE message-msgty
                 NUMBER message-msgno
@@ -778,6 +814,8 @@ CLASS zcl_logger IMPLEMENTATION.
           bapiret2-message    = exception_msg.
           bapiret2-system     = sy-sysid.
           APPEND bapiret2 TO result.
+        ELSE.
+          RAISE EXCEPTION TYPE zcx_logger.
         ENDIF.
       ENDIF.
     ENDLOOP.
@@ -794,7 +832,9 @@ CLASS zcl_logger IMPLEMENTATION.
       EXPORTING  i_log_handle  = handle
       EXCEPTIONS log_not_found = 1
                  OTHERS        = 2.
-    ASSERT sy-subrc = 0.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
   ENDMETHOD.
 
   METHOD zif_logger~get_db_number.
@@ -865,7 +905,9 @@ CLASS zcl_logger IMPLEMENTATION.
       EXCEPTIONS log_not_found           = 1
                  log_header_inconsistent = 2
                  OTHERS                  = 3.
-    ASSERT sy-subrc = 0.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     result = me.
   ENDMETHOD.

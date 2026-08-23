@@ -167,7 +167,12 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       EXPORTING
         i_s_log      = lo_log->header
       IMPORTING
-        e_log_handle = lo_log->handle.
+        e_log_handle = lo_log->handle
+      EXCEPTIONS
+        OTHERS       = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     " BAL_LOG_CREATE will fill in some additional header data.
     " This FM updates our instance attribute to reflect that.
@@ -175,7 +180,12 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       EXPORTING
         i_log_handle = lo_log->handle
       IMPORTING
-        e_s_log      = lo_log->header.
+        e_s_log      = lo_log->header
+      EXCEPTIONS
+        OTHERS       = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     result = lo_log.
   ENDMETHOD.
@@ -251,7 +261,12 @@ CLASS zcl_logger_factory IMPLEMENTATION.
         i_extnumber    = l_extnumber
         i_t_lognumber  = log_numbers
       IMPORTING
-        e_s_log_filter = filter.
+        e_s_log_filter = filter
+      EXCEPTIONS
+        OTHERS         = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     CALL FUNCTION 'BAL_DB_SEARCH'
       EXPORTING
@@ -259,7 +274,11 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       IMPORTING
         e_t_log_header = result
       EXCEPTIONS
-        log_not_found  = 1.
+        log_not_found  = 0
+        OTHERS         = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
   ENDMETHOD.
 
   METHOD open_log_by_header.
@@ -299,7 +318,12 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       EXPORTING
         i_log_handle = logger->handle
       IMPORTING
-        e_s_log      = logger->header.
+        e_s_log      = logger->header
+      EXCEPTIONS
+        OTHERS       = 1.
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
 
     result = logger.
   ENDMETHOD.
