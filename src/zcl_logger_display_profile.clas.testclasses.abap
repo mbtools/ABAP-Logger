@@ -1,4 +1,4 @@
-CLASS lcl_display_profile_should DEFINITION FOR TESTING
+CLASS ltcl_display_profile_should DEFINITION FOR TESTING
   RISK LEVEL HARMLESS
   DURATION SHORT.
 
@@ -12,7 +12,7 @@ CLASS lcl_display_profile_should DEFINITION FOR TESTING
     METHODS rejects_unknown_profile_field FOR TESTING.
 ENDCLASS.
 
-CLASS lcl_display_profile_should IMPLEMENTATION.
+CLASS ltcl_display_profile_should IMPLEMENTATION.
 
   METHOD setup.
     cut = zcl_logger_factory=>create_display_profile( ).

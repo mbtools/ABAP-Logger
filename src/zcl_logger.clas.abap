@@ -36,12 +36,6 @@ CLASS zcl_logger DEFINITION
     DATA settings TYPE REF TO zif_logger_settings.
 
     "! Safety limit for previous exception drill down
-    "!
-    "! @parameter exception |
-    "! @parameter type |
-    "! @parameter importance |
-    "! @parameter detlevel |
-    "! @parameter result |
     METHODS drill_down_into_exception
       IMPORTING !exception                     TYPE REF TO cx_root
                 !type                          TYPE symsgty   OPTIONAL
@@ -106,7 +100,10 @@ CLASS zcl_logger DEFINITION
 ENDCLASS.
 
 
+
 CLASS zcl_logger IMPLEMENTATION.
+
+
   METHOD add_bapi_alm_msg.
     DATA: " Avoid using concrete type as certain systems may not have BAPI_ALM_RETURN
       BEGIN OF bapi_alm_message,
@@ -129,6 +126,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgv4 = bapi_alm_message-message_v4.
   ENDMETHOD.
 
+
   METHOD add_bapi_meth_msg.
     DATA: " Avoid using concrete type as certain systems may not have BAPI_METH_MESSAGE
       BEGIN OF bapi_meth_message,
@@ -148,6 +146,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgno = bapi_meth_message-message_number.
   ENDMETHOD.
 
+
   METHOD add_bapi_msg.
     DATA bapi_message TYPE bapiret1.
 
@@ -160,6 +159,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgv3 = bapi_message-message_v3.
     result-msgv4 = bapi_message-message_v4.
   ENDMETHOD.
+
 
   METHOD add_bapi_status_result.
     DATA: " Avoid using concrete type as certain systems may not have BAPI_STATUS_RESULT
@@ -179,6 +179,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgno = bapi_status_result-message_number.
   ENDMETHOD.
 
+
   METHOD add_bdc_msg.
     DATA bdc_message TYPE bdcmsgcoll.
 
@@ -191,6 +192,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgv3 = bdc_message-msgv3.
     result-msgv4 = bdc_message-msgv4.
   ENDMETHOD.
+
 
   METHOD add_exception.
     DATA message            TYPE bal_s_msg.
@@ -259,6 +261,7 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
   METHOD add_sprot_msg.
     DATA sprot_message TYPE sprot_u.
 
@@ -271,6 +274,7 @@ CLASS zcl_logger IMPLEMENTATION.
     result-msgv3 = sprot_message-var3.
     result-msgv4 = sprot_message-var4.
   ENDMETHOD.
+
 
   METHOD add_structure.
     DATA msg_type        TYPE REF TO cl_abap_typedescr.
@@ -315,12 +319,14 @@ CLASS zcl_logger IMPLEMENTATION.
     zif_logger~add( '--- End of structure ---' ).
   ENDMETHOD.
 
+
   METHOD add_syst_msg.
     DATA syst_message TYPE symsg.
 
     MOVE-CORRESPONDING obj_to_log TO syst_message.
     MOVE-CORRESPONDING syst_message TO result.
   ENDMETHOD.
+
 
   METHOD drill_down_into_exception.
     DATA i                  TYPE i VALUE 2.
@@ -360,6 +366,7 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+
   METHOD get_message_handles.
     DATA log_handle TYPE bal_t_logh.
     DATA filter     TYPE bal_s_mfil.
@@ -385,6 +392,7 @@ CLASS zcl_logger IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_logger.
     ENDIF.
   ENDMETHOD.
+
 
   METHOD get_struct_kind.
     DATA msg_struct_kind   TYPE REF TO cl_abap_structdescr.
@@ -449,6 +457,7 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
   METHOD save_log.
     DATA log_handles       TYPE bal_t_logh.
     DATA log_numbers       TYPE bal_t_lgnm.
@@ -478,6 +487,7 @@ CLASS zcl_logger IMPLEMENTATION.
         EXCEPTIONS OTHERS    = 0.
     ENDIF.
   ENDMETHOD.
+
 
   METHOD zif_logger_log_object~get_message_table.
     DATA message_handles TYPE bal_t_msgh.
@@ -523,6 +533,7 @@ CLASS zcl_logger IMPLEMENTATION.
                 importance          = importance
                 detlevel            = detlevel ).
   ENDMETHOD.
+
 
   METHOD zif_logger~add.
     DATA message_to_add     TYPE bal_s_msg.
@@ -722,18 +733,6 @@ CLASS zcl_logger IMPLEMENTATION.
     result = me.
   ENDMETHOD.
 
-  METHOD zif_logger~trace.
-    result = zif_logger~add( obj_to_log          = obj_to_log
-                context             = context
-                callback_form       = callback_form
-                callback_prog       = callback_prog
-                callback_fm         = callback_fm
-                callback_parameters = callback_parameters
-                type                = ' '
-                importance          = importance
-                detlevel            = detlevel ).
-  ENDMETHOD.
-
 
   METHOD zif_logger~error.
     result = zif_logger~add( obj_to_log          = obj_to_log
@@ -747,6 +746,7 @@ CLASS zcl_logger IMPLEMENTATION.
                 detlevel            = detlevel ).
   ENDMETHOD.
 
+
   METHOD zif_logger~exit.
     result = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
@@ -758,6 +758,7 @@ CLASS zcl_logger IMPLEMENTATION.
                 importance          = importance
                 detlevel            = detlevel ).
   ENDMETHOD.
+
 
   METHOD zif_logger~export_to_table.
     DATA message_handles TYPE bal_t_msgh.
@@ -821,6 +822,7 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+
   METHOD zif_logger~free.
     " Save any messages (safety) only if an object has been defined
     IF me->header-object IS NOT INITIAL.
@@ -837,21 +839,26 @@ CLASS zcl_logger IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
   METHOD zif_logger~get_db_number.
     result = db_number.
   ENDMETHOD.
+
 
   METHOD zif_logger~get_handle.
     result = handle.
   ENDMETHOD.
 
+
   METHOD zif_logger~get_header.
     result = header.
   ENDMETHOD.
 
+
   METHOD zif_logger~has_errors.
     result = boolc( lines( get_message_handles( msgtype = 'E' ) ) > 0 ).
   ENDMETHOD.
+
 
   METHOD zif_logger~has_warnings.
     result = boolc( lines( get_message_handles( msgtype = 'W' ) ) > 0 ).
@@ -870,31 +877,22 @@ CLASS zcl_logger IMPLEMENTATION.
                 detlevel            = detlevel ).
   ENDMETHOD.
 
+
   METHOD zif_logger~is_empty.
     result = boolc( zif_logger~length( ) = 0 ).
   ENDMETHOD.
+
 
   METHOD zif_logger~length.
     result = lines( get_message_handles( ) ).
   ENDMETHOD.
 
 
-  METHOD zif_logger~success.
-    result = zif_logger~add( obj_to_log          = obj_to_log
-                context             = context
-                callback_form       = callback_form
-                callback_prog       = callback_prog
-                callback_fm         = callback_fm
-                callback_parameters = callback_parameters
-                type                = 'S'
-                importance          = importance
-                detlevel            = detlevel ).
-  ENDMETHOD.
-
   METHOD zif_logger~save.
     CHECK settings->get_autosave( ) = abap_false.
     save_log( ).
   ENDMETHOD.
+
 
   METHOD zif_logger~set_header.
     me->header-extnumber = description.
@@ -912,6 +910,33 @@ CLASS zcl_logger IMPLEMENTATION.
     result = me.
   ENDMETHOD.
 
+
+  METHOD zif_logger~success.
+    result = zif_logger~add( obj_to_log          = obj_to_log
+                context             = context
+                callback_form       = callback_form
+                callback_prog       = callback_prog
+                callback_fm         = callback_fm
+                callback_parameters = callback_parameters
+                type                = 'S'
+                importance          = importance
+                detlevel            = detlevel ).
+  ENDMETHOD.
+
+
+  METHOD zif_logger~trace.
+    result = zif_logger~add( obj_to_log          = obj_to_log
+                context             = context
+                callback_form       = callback_form
+                callback_prog       = callback_prog
+                callback_fm         = callback_fm
+                callback_parameters = callback_parameters
+                type                = ' '
+                importance          = importance
+                detlevel            = detlevel ).
+  ENDMETHOD.
+
+
   METHOD zif_logger~warning.
     result = zif_logger~add( obj_to_log          = obj_to_log
                 context             = context
@@ -923,5 +948,4 @@ CLASS zcl_logger IMPLEMENTATION.
                 importance          = importance
                 detlevel            = detlevel ).
   ENDMETHOD.
-
 ENDCLASS.

@@ -30,7 +30,7 @@ CLASS lcx_t100 IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-CLASS ltd_loggable_object DEFINITION CREATE PUBLIC FOR TESTING.
+CLASS ltcl_loggable_object DEFINITION CREATE PUBLIC FOR TESTING.
 
   PUBLIC SECTION.
     DATA messages TYPE zif_logger_log_object=>tty_messages .
@@ -40,7 +40,7 @@ CLASS ltd_loggable_object DEFINITION CREATE PUBLIC FOR TESTING.
 
 ENDCLASS.
 
-CLASS ltd_loggable_object IMPLEMENTATION.
+CLASS ltcl_loggable_object IMPLEMENTATION.
 
   METHOD zif_logger_log_object~get_message_table.
     result = messages.
@@ -48,7 +48,7 @@ CLASS ltd_loggable_object IMPLEMENTATION.
 
 ENDCLASS.
 
-CLASS lcl_test DEFINITION FOR TESTING
+CLASS ltcl_test DEFINITION FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
   PRIVATE SECTION.
@@ -137,7 +137,7 @@ CLASS lcl_test DEFINITION FOR TESTING
 
 ENDCLASS.
 
-CLASS lcl_test IMPLEMENTATION.
+CLASS ltcl_test IMPLEMENTATION.
 
   METHOD class_setup.
     zcl_logger_factory=>create_log(
@@ -1189,7 +1189,7 @@ CLASS lcl_test IMPLEMENTATION.
     DATA loggable_message TYPE zif_logger_log_object=>ty_message.
     DATA dummy            TYPE string.
 
-    DATA loggable         TYPE REF TO ltd_loggable_object.
+    DATA loggable         TYPE REF TO ltcl_loggable_object.
     CREATE OBJECT loggable.
 
     MESSAGE s001(00) WITH 'I' 'test' 'the' 'logger.' INTO dummy.
