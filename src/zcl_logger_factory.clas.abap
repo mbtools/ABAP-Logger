@@ -9,11 +9,11 @@ CLASS zcl_logger_factory DEFINITION
     "! Starts a new log.
     CLASS-METHODS create_log
       IMPORTING
-        object       TYPE csequence OPTIONAL
-        subobject    TYPE csequence OPTIONAL
-        extnumber    TYPE csequence OPTIONAL
-        context      TYPE any OPTIONAL
-        settings     TYPE REF TO zif_logger_settings OPTIONAL
+        object        TYPE csequence OPTIONAL
+        subobject     TYPE csequence OPTIONAL
+        extnumber     TYPE csequence OPTIONAL
+        context       TYPE any OPTIONAL
+        settings      TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO zif_logger.
 
@@ -26,7 +26,7 @@ CLASS zcl_logger_factory DEFINITION
         create_if_does_not_exist TYPE abap_bool DEFAULT abap_false
         settings                 TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
-        VALUE(result)             TYPE REF TO zif_logger.
+        VALUE(result)            TYPE REF TO zif_logger.
 
     "! Creates a settings object which can be modified. It can be pass on
     "! the creation of the logger to change its behavior.
@@ -44,23 +44,21 @@ CLASS zcl_logger_factory DEFINITION
 
     CLASS-METHODS create_display_profile
       IMPORTING
-        i_detlevel               TYPE clike OPTIONAL
-        i_no_tree                TYPE clike OPTIONAL
-        i_popup                  TYPE clike OPTIONAL
-        i_single_log             TYPE clike OPTIONAL
-        i_standard               TYPE clike DEFAULT abap_true
+        i_detlevel    TYPE clike OPTIONAL
+        i_no_tree     TYPE clike OPTIONAL
+        i_popup       TYPE clike OPTIONAL
+        i_single_log  TYPE clike OPTIONAL
+        i_standard    TYPE clike DEFAULT abap_true
       RETURNING
         VALUE(result) TYPE REF TO zif_logger_display_profile.
-
 
     "! Reopens specific log instance.
     CLASS-METHODS open_log_by_db_number
       IMPORTING
-        db_number    TYPE balognr
-        settings     TYPE REF TO zif_logger_settings OPTIONAL
+        db_number     TYPE balognr
+        settings      TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO zif_logger.
-
 
   PROTECTED SECTION.
   PRIVATE SECTION.
@@ -74,19 +72,20 @@ CLASS zcl_logger_factory DEFINITION
 
     CLASS-METHODS find_log_headers
       IMPORTING
-        object                 TYPE csequence OPTIONAL
-        subobject              TYPE csequence OPTIONAL
-        extnumber              TYPE csequence OPTIONAL
-        db_number              TYPE balognr OPTIONAL
+        object        TYPE csequence OPTIONAL
+        subobject     TYPE csequence OPTIONAL
+        extnumber     TYPE csequence OPTIONAL
+        db_number     TYPE balognr OPTIONAL
       RETURNING
         VALUE(result) TYPE balhdr_t.
 
     CLASS-METHODS open_log_by_header
       IMPORTING
-        header       TYPE balhdr
-        settings     TYPE REF TO zif_logger_settings OPTIONAL
+        header        TYPE balhdr
+        settings      TYPE REF TO zif_logger_settings OPTIONAL
       RETURNING
         VALUE(result) TYPE REF TO zif_logger.
+
 ENDCLASS.
 
 
@@ -111,18 +110,11 @@ CLASS zcl_logger_factory IMPLEMENTATION.
     ENDIF.
 
     result->set(
-      i_detlevel    = i_detlevel
-      i_no_tree     = i_no_tree
-      i_popup       = i_popup
-      i_single_log  = i_single_log
-      i_standard    = i_standard ).
-  ENDMETHOD.
-
-  METHOD create_ui.
-    IF log_ui IS INITIAL.
-      CREATE OBJECT log_ui TYPE zcl_logger_ui.
-    ENDIF.
-    result = log_ui.
+      i_detlevel   = i_detlevel
+      i_no_tree    = i_no_tree
+      i_popup      = i_popup
+      i_single_log = i_single_log
+      i_standard   = i_standard ).
   ENDMETHOD.
 
 
@@ -200,43 +192,11 @@ CLASS zcl_logger_factory IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD open_log.
-    DATA: found_headers      TYPE balhdr_t,
-          most_recent_header TYPE balhdr.
-
-    found_headers = find_log_headers( object = object subobject = subobject extnumber = extnumber ).
-
-    IF lines( found_headers ) = 0 .
-      IF create_if_does_not_exist = abap_true.
-        result = create_log( object    = object
-                            subobject = subobject
-                            extnumber = extnumber
-                            settings  = settings ).
-      ENDIF.
-      RETURN.
+  METHOD create_ui.
+    IF log_ui IS INITIAL.
+      CREATE OBJECT log_ui TYPE zcl_logger_ui.
     ENDIF.
-
-    " Delete all but the last row.
-    IF lines( found_headers ) > 1.
-      DELETE found_headers TO ( lines( found_headers ) - 1 ).
-    ENDIF.
-    READ TABLE found_headers INDEX 1 INTO most_recent_header.
-
-    result = open_log_by_header( header = most_recent_header settings = settings ).
-  ENDMETHOD.
-
-  METHOD open_log_by_db_number.
-    DATA: header      TYPE balhdr,
-          log_headers TYPE balhdr_t.
-
-    log_headers = find_log_headers( db_number = db_number ).
-    IF lines( log_headers ) <> 1.
-      "^Should find exactly one log since db_number is unique identifier
-      RAISE EXCEPTION TYPE zcx_logger.
-    ENDIF.
-
-    READ TABLE log_headers INDEX 1 INTO header.
-    result = open_log_by_header( header = header settings = settings ).
+    result = log_ui.
   ENDMETHOD.
 
 
@@ -280,6 +240,48 @@ CLASS zcl_logger_factory IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_logger.
     ENDIF.
   ENDMETHOD.
+
+
+  METHOD open_log.
+    DATA: found_headers      TYPE balhdr_t,
+          most_recent_header TYPE balhdr.
+
+    found_headers = find_log_headers( object = object subobject = subobject extnumber = extnumber ).
+
+    IF lines( found_headers ) = 0 .
+      IF create_if_does_not_exist = abap_true.
+        result = create_log( object    = object
+                             subobject = subobject
+                             extnumber = extnumber
+                             settings  = settings ).
+      ENDIF.
+      RETURN.
+    ENDIF.
+
+    " Delete all but the last row.
+    IF lines( found_headers ) > 1.
+      DELETE found_headers TO ( lines( found_headers ) - 1 ).
+    ENDIF.
+    READ TABLE found_headers INDEX 1 INTO most_recent_header.
+
+    result = open_log_by_header( header = most_recent_header settings = settings ).
+  ENDMETHOD.
+
+
+  METHOD open_log_by_db_number.
+    DATA: header      TYPE balhdr,
+          log_headers TYPE balhdr_t.
+
+    log_headers = find_log_headers( db_number = db_number ).
+    IF lines( log_headers ) <> 1.
+      "^Should find exactly one log since db_number is unique identifier
+      RAISE EXCEPTION TYPE zcx_logger.
+    ENDIF.
+
+    READ TABLE log_headers INDEX 1 INTO header.
+    result = open_log_by_header( header = header settings = settings ).
+  ENDMETHOD.
+
 
   METHOD open_log_by_header.
     DATA:   log_headers  TYPE balhdr_t.
@@ -327,5 +329,4 @@ CLASS zcl_logger_factory IMPLEMENTATION.
 
     result = logger.
   ENDMETHOD.
-
 ENDCLASS.

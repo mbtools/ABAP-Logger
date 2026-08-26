@@ -2,34 +2,42 @@ CLASS zcl_logger_display_profile DEFINITION
   PUBLIC
   FINAL
   CREATE PRIVATE
-   GLOBAL FRIENDS zcl_logger_factory.
+  GLOBAL FRIENDS zcl_logger_factory.
 
   PUBLIC SECTION.
+
     INTERFACES zif_logger_display_profile.
+
   PROTECTED SECTION.
+
     DATA display_profile TYPE bal_s_prof.
+
   PRIVATE SECTION.
 
     METHODS get_structure_components
       IMPORTING
-        i_structure_name    TYPE clike
+        i_structure_name TYPE clike
       RETURNING
-        VALUE(result) TYPE cl_abap_structdescr=>component_table.
+        VALUE(result)    TYPE cl_abap_structdescr=>component_table.
 ENDCLASS.
 
 
 
 CLASS zcl_logger_display_profile IMPLEMENTATION.
 
+
   METHOD get_structure_components.
     DATA strucdescr TYPE REF TO cl_abap_structdescr.
+
     strucdescr ?= cl_abap_structdescr=>describe_by_name( i_structure_name ).
     result = strucdescr->get_components( ).
   ENDMETHOD.
 
+
   METHOD zif_logger_display_profile~get.
     result = display_profile.
   ENDMETHOD.
+
 
   METHOD zif_logger_display_profile~set.
     CASE abap_true.
@@ -72,13 +80,14 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     result = me.
   ENDMETHOD.
 
-  METHOD zif_logger_display_profile~set_context_message.
-    CHECK display_profile IS NOT INITIAL.
 
+  METHOD zif_logger_display_profile~set_context_message.
     DATA colpos     TYPE i VALUE 100.
     DATA mess_fcat  LIKE LINE OF display_profile-mess_fcat.
     DATA component  TYPE cl_abap_structdescr=>component.
     DATA components TYPE cl_abap_structdescr=>component_table.
+
+    CHECK display_profile IS NOT INITIAL.
 
     components = get_structure_components( i_context_structure ).
 
@@ -95,6 +104,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
 
     result = me.
   ENDMETHOD.
+
 
   METHOD zif_logger_display_profile~set_context_tree.
     FIELD-SYMBOLS <lev1_fcat> TYPE bal_t_fcat.
@@ -165,6 +175,7 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     result = me.
   ENDMETHOD.
 
+
   METHOD zif_logger_display_profile~set_grid.
     zif_logger_display_profile~set_value(
       i_fld = 'USE_GRID'
@@ -173,8 +184,10 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     result = me.
   ENDMETHOD.
 
+
   METHOD zif_logger_display_profile~set_value.
     FIELD-SYMBOLS <value> TYPE any.
+
     ASSIGN COMPONENT i_fld OF STRUCTURE display_profile TO <value>.
     IF sy-subrc = 0.
       <value> = i_val.
@@ -186,5 +199,4 @@ CLASS zcl_logger_display_profile IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
-
 ENDCLASS.

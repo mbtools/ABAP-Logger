@@ -1,13 +1,15 @@
 CLASS lcx_t100 DEFINITION INHERITING FROM cx_static_check.
   PUBLIC SECTION.
     INTERFACES if_t100_message.
-    METHODS constructor IMPORTING previous LIKE previous OPTIONAL
-                                  id       TYPE symsgid
-                                  no       TYPE symsgno
-                                  msgv1    TYPE symsgv OPTIONAL
-                                  msgv2    TYPE symsgv OPTIONAL
-                                  msgv3    TYPE symsgv OPTIONAL
-                                  msgv4    TYPE symsgv OPTIONAL.
+    METHODS constructor
+      IMPORTING
+        previous LIKE previous OPTIONAL
+        id       TYPE symsgid
+        no       TYPE symsgno
+        msgv1    TYPE symsgv OPTIONAL
+        msgv2    TYPE symsgv OPTIONAL
+        msgv3    TYPE symsgv OPTIONAL
+        msgv4    TYPE symsgv OPTIONAL.
     DATA msgv1 TYPE symsgv.
     DATA msgv2 TYPE symsgv.
     DATA msgv3 TYPE symsgv.
@@ -51,6 +53,7 @@ ENDCLASS.
 CLASS ltcl_test DEFINITION FOR TESTING
   DURATION SHORT
   RISK LEVEL HARMLESS.
+
   PRIVATE SECTION.
 
     TYPES:
@@ -68,24 +71,26 @@ CLASS ltcl_test DEFINITION FOR TESTING
       setup,
       teardown,
       get_first_message
-        IMPORTING log_handle TYPE balloghndl
-        RETURNING VALUE(result) TYPE char255,
+        IMPORTING
+          log_handle    TYPE balloghndl
+        RETURNING
+          VALUE(result) TYPE char255,
       get_messages
         IMPORTING
           log_handle  TYPE balloghndl
         EXPORTING
           texts       TYPE table_of_strings
           msg_details TYPE ty_bal_tt_msg,
-
       format_message
-        IMPORTING id         LIKE sy-msgid DEFAULT sy-msgid
-                  no         LIKE sy-msgno DEFAULT sy-msgno
-                  v1         LIKE sy-msgv1 DEFAULT sy-msgv1
-                  v2         LIKE sy-msgv2 DEFAULT sy-msgv2
-                  v3         LIKE sy-msgv3 DEFAULT sy-msgv3
-                  v4         LIKE sy-msgv4 DEFAULT sy-msgv4
-        RETURNING VALUE(result) TYPE string,
-
+        IMPORTING
+          id            LIKE sy-msgid DEFAULT sy-msgid
+          no            LIKE sy-msgno DEFAULT sy-msgno
+          v1            LIKE sy-msgv1 DEFAULT sy-msgv1
+          v2            LIKE sy-msgv2 DEFAULT sy-msgv2
+          v3            LIKE sy-msgv3 DEFAULT sy-msgv3
+          v4            LIKE sy-msgv4 DEFAULT sy-msgv4
+        RETURNING
+          VALUE(result) TYPE string,
       can_create_anon_log FOR TESTING,
       can_create_named_log FOR TESTING,
       can_reopen_log FOR TESTING,
@@ -107,6 +112,7 @@ CLASS ltcl_test DEFINITION FOR TESTING
       can_log_rcomp     FOR TESTING,
       can_log_prott FOR TESTING,
       can_log_sprot FOR TESTING,
+      can_log_skwf_msg FOR TESTING,
       can_log_bal_s_msg FOR TESTING,
       can_log_bapirettab FOR TESTING,
       can_log_err FOR TESTING,
@@ -141,19 +147,19 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD class_setup.
     zcl_logger_factory=>create_log(
-      object = 'ABAPUNIT'
+      object    = 'ABAPUNIT'
       subobject = ''
       extnumber = 'Log saved in database' )->add( 'This message is in the database' ).
   ENDMETHOD.
 
   METHOD setup.
     anon_log  = zcl_logger_factory=>create_log( ).
-    named_log = zcl_logger_factory=>create_log( object = 'ABAPUNIT'
-                                 subobject = ''
-                                 extnumber = `Hey it's a log` ).
-    reopened_log = zcl_logger_factory=>open_log( object = 'ABAPUNIT'
-                                     subobject = ''
-                                     extnumber = 'Log saved in database' ).
+    named_log = zcl_logger_factory=>create_log( object    = 'ABAPUNIT'
+                                                subobject = ''
+                                                extnumber = `Hey it's a log` ).
+    reopened_log = zcl_logger_factory=>open_log( object    = 'ABAPUNIT'
+                                                 subobject = ''
+                                                 extnumber = 'Log saved in database' ).
   ENDMETHOD.
 
   METHOD can_create_anon_log.
@@ -197,13 +203,13 @@ CLASS ltcl_test IMPLEMENTATION.
     lv_exp = sy-datum + days_until_log_can_be_deleted.
 
     cl_abap_unit_assert=>assert_equals(
-      exp     = lv_exp
-      act     = act_header-aldate_del
-      msg     = 'Log is not expiring in correct amount of days' ).
+      exp = lv_exp
+      act = act_header-aldate_del
+      msg = 'Log is not expiring in correct amount of days' ).
     cl_abap_unit_assert=>assert_equals(
-      exp     = abap_true
-      act     = act_header-del_before
-      msg     = 'Log should not be deletable before expiry date' ).
+      exp = abap_true
+      act = act_header-del_before
+      msg = 'Log should not be deletable before expiry date' ).
   ENDMETHOD.
 
   METHOD can_create_expiring_log_date.
@@ -235,13 +241,13 @@ CLASS ltcl_test IMPLEMENTATION.
         e_s_log      = act_header.
 
     cl_abap_unit_assert=>assert_equals(
-      exp     = lv_expire
-      act     = act_header-aldate_del
-      msg     = 'Log is not expiring on correct date' ).
+      exp = lv_expire
+      act = act_header-aldate_del
+      msg = 'Log is not expiring on correct date' ).
     cl_abap_unit_assert=>assert_equals(
-      exp     = abap_true
-      act     = act_header-del_before
-      msg     = 'Log should not be deletable before expiry date' ).
+      exp = abap_true
+      act = act_header-del_before
+      msg = 'Log should not be deletable before expiry date' ).
   ENDMETHOD.
 
   METHOD can_reopen_log.
@@ -254,14 +260,14 @@ CLASS ltcl_test IMPLEMENTATION.
     DATA: created_log TYPE REF TO zif_logger,
           handles     TYPE bal_t_logh.
     CALL FUNCTION 'BAL_GLB_MEMORY_REFRESH'.                "Close Logs
-    reopened_log = zcl_logger_factory=>open_log( object = 'ABAPUNIT'
-                                     subobject = ''
-                                     extnumber = 'Log saved in database'
-                                     create_if_does_not_exist = abap_true ).
-    created_log = zcl_logger_factory=>open_log( object = 'ABAPUNIT'
-                                    subobject = ''
-                                    extnumber = 'Log not in database'
-                                    create_if_does_not_exist = abap_true ).
+    reopened_log = zcl_logger_factory=>open_log( object                   = 'ABAPUNIT'
+                                                 subobject                = ''
+                                                 extnumber                = 'Log saved in database'
+                                                 create_if_does_not_exist = abap_true ).
+    created_log = zcl_logger_factory=>open_log( object                   = 'ABAPUNIT'
+                                                subobject                = ''
+                                                extnumber                = 'Log not in database'
+                                                create_if_does_not_exist = abap_true ).
     CALL FUNCTION 'BAL_GLB_SEARCH_LOG'
       IMPORTING
         e_t_log_handle = handles.
@@ -358,8 +364,8 @@ CLASS ltcl_test IMPLEMENTATION.
       EXPORTING
         i_t_lognumber = log_numbers.
 
-    get_messages( EXPORTING log_handle  = reopened_log->get_handle( )
-                  IMPORTING texts       = act_texts ).
+    get_messages( EXPORTING log_handle = reopened_log->get_handle( )
+                  IMPORTING texts      = act_texts ).
 
     READ TABLE act_texts INDEX 1 INTO act_text.
     cl_abap_unit_assert=>assert_equals(
@@ -814,6 +820,54 @@ CLASS ltcl_test IMPLEMENTATION.
       msg = 'Did not log or fetch system message properly' ).
   ENDMETHOD.
 
+ METHOD can_log_skwf_msg.
+    DATA: skwf_msg         TYPE skwf_error,
+          msg_handle       TYPE balmsghndl,
+          expected_details TYPE bal_s_msg,
+          actual_details   TYPE bal_s_msg,
+          actual_text      TYPE char200.
+
+    expected_details-msgty = skwf_msg-type = 'W'.
+    expected_details-msgid = skwf_msg-id = 'BL'.
+    expected_details-msgno = skwf_msg-no = '001'.
+    expected_details-msgv1 = skwf_msg-v1 = 'This'.
+    expected_details-msgv2 = skwf_msg-v2 = 'is'.
+    expected_details-msgv3 = skwf_msg-v3 = 'a'.
+    expected_details-msgv4 = skwf_msg-v4 = 'test'.
+
+    anon_log->add( skwf_msg ).
+
+    msg_handle-log_handle = anon_log->get_handle( ).
+    msg_handle-msgnumber  = '000001'.
+
+    CALL FUNCTION 'BAL_LOG_MSG_READ'
+      EXPORTING
+        i_s_msg_handle = msg_handle
+      IMPORTING
+        e_s_msg        = actual_details
+        e_txt_msg      = actual_text.
+
+    cl_abap_unit_assert=>assert_not_initial(
+      act = actual_details-time_stmp
+      msg = 'Did not log system message properly' ).
+
+    expected_details-msg_count = 1.
+    CLEAR actual_details-time_stmp.
+
+    cl_abap_unit_assert=>assert_equals(
+      exp = expected_details
+      act = actual_details
+      msg = 'Did not log system message properly' ).
+    cl_abap_unit_assert=>assert_equals(
+      exp = 'This is a test'
+      act = condense( actual_text )
+      msg = 'Did not log system message properly' ).
+    cl_abap_unit_assert=>assert_equals(
+      exp = abap_true
+      act = anon_log->has_warnings( )
+      msg = 'Did not log or fetch system message properly' ).
+  ENDMETHOD.
+
   METHOD can_log_bal_s_msg.
     DATA: bal_s_msg        TYPE bal_s_msg,
           msg_handle       TYPE balmsghndl,
@@ -995,7 +1049,7 @@ CLASS ltcl_test IMPLEMENTATION.
     ENDTRY.
 
     "Then
-    get_messages( EXPORTING log_handle = anon_log->get_handle( )
+    get_messages( EXPORTING log_handle  = anon_log->get_handle( )
                   IMPORTING msg_details = bal_msgs ).
 
     DESCRIBE TABLE bal_msgs LINES msg_count.
@@ -1163,7 +1217,7 @@ CLASS ltcl_test IMPLEMENTATION.
           act_details  TYPE bal_s_msg.
 
     anon_log->add( obj_to_log = 'Here is some text'
-                   context = addl_context ).
+                   context    = addl_context ).
 
     msg_handle-log_handle = anon_log->get_handle( ).
     msg_handle-msgnumber  = '000001'.
@@ -1245,11 +1299,11 @@ CLASS ltcl_test IMPLEMENTATION.
         e_s_msg        = act_details.
 
     cl_abap_unit_assert=>assert_initial(
-        act = act_details-context-value
-        msg = 'Context should only be added to first line'  ).
+      act = act_details-context-value
+      msg = 'Context should only be added to first line' ).
     cl_abap_unit_assert=>assert_initial(
-        act = act_details-context-tabname
-        msg = 'Context should only be added to first line'  ).
+      act = act_details-context-tabname
+      msg = 'Context should only be added to first line' ).
   ENDMETHOD.
 
   METHOD can_add_callback_sub.
@@ -1257,7 +1311,7 @@ CLASS ltcl_test IMPLEMENTATION.
           msg_detail   TYPE bal_s_msg,
           exp_callback TYPE bal_s_clbk.
 
-    anon_log->add( obj_to_log = 'Message with Callback'
+    anon_log->add( obj_to_log    = 'Message with Callback'
                    callback_form = 'FORM'
                    callback_prog = 'PROGRAM' ).
 
@@ -1285,7 +1339,7 @@ CLASS ltcl_test IMPLEMENTATION.
           msg_detail   TYPE bal_s_msg,
           exp_callback TYPE bal_s_clbk.
 
-    anon_log->add( obj_to_log = 'Message with Callback'
+    anon_log->add( obj_to_log  = 'Message with Callback'
                    callback_fm = 'FUNCTION' ).
 
     msg_handle-log_handle = anon_log->get_handle( ).
@@ -1555,25 +1609,25 @@ CLASS ltcl_test IMPLEMENTATION.
     named_log->set_header( extnumber ).
 
     cl_abap_unit_assert=>assert_equals(
-        exp = extnumber
-        act = named_log->get_header( )-extnumber
-        msg = 'Did not return new extnumber' ).
+      exp = extnumber
+      act = named_log->get_header( )-extnumber
+      msg = 'Did not return new extnumber' ).
 
     named_log->save( ).
 
     CALL FUNCTION 'BAL_GLB_MEMORY_REFRESH'.                "Close Logs
     reopened_log = zcl_logger_factory=>open_log( object    = 'ABAPUNIT'
-                                     subobject = ''
-                                     extnumber      = extnumber ).
+                                                 subobject = ''
+                                                 extnumber = extnumber ).
 
     cl_abap_unit_assert=>assert_bound(
-        act = reopened_log
-        msg = 'Did not find log with new extnumber' ).
+      act = reopened_log
+      msg = 'Did not find log with new extnumber' ).
 
     cl_abap_unit_assert=>assert_equals(
-        exp = extnumber
-        act = reopened_log->get_header( )-extnumber
-        msg = 'Did not return new extnumber' ).
+      exp = extnumber
+      act = reopened_log->get_header( )-extnumber
+      msg = 'Did not return new extnumber' ).
   ENDMETHOD.
 
   METHOD can_log_callback_params.
@@ -1592,30 +1646,30 @@ CLASS ltcl_test IMPLEMENTATION.
     INSERT parameter INTO TABLE callback_parameters.
 
     anon_log->abend(
-        obj_to_log          = |Test W|
-        callback_fm         = 'DUMMY'
-        callback_parameters = callback_parameters ).
+      obj_to_log          = |Test W|
+      callback_fm         = 'DUMMY'
+      callback_parameters = callback_parameters ).
 
     anon_log->error(
-        obj_to_log          = |Test E|
-        callback_fm         = 'DUMMY'
-        callback_parameters = callback_parameters ).
+      obj_to_log          = |Test E|
+      callback_fm         = 'DUMMY'
+      callback_parameters = callback_parameters ).
 
     anon_log->info(
-        obj_to_log          = |Test I|
-        callback_fm         = 'DUMMY'
-        callback_parameters = callback_parameters ).
+      obj_to_log          = |Test I|
+      callback_fm         = 'DUMMY'
+      callback_parameters = callback_parameters ).
 
     anon_log->success(
-        obj_to_log          = |Test S|
-        callback_fm         = 'DUMMY'
-        callback_parameters = callback_parameters ).
+      obj_to_log          = |Test S|
+      callback_fm         = 'DUMMY'
+      callback_parameters = callback_parameters ).
 
     anon_log->warning(
-        obj_to_log          = |Test W|
-        callback_form       = 'DUMMY_FORM'
-        callback_prog       = 'DUMMY_PROG'
-        callback_parameters = callback_parameters ).
+      obj_to_log          = |Test W|
+      callback_form       = 'DUMMY_FORM'
+      callback_prog       = 'DUMMY_PROG'
+      callback_parameters = callback_parameters ).
 
     get_messages(
       EXPORTING
@@ -1626,8 +1680,8 @@ CLASS ltcl_test IMPLEMENTATION.
     LOOP AT act_details ASSIGNING <detail>.
 
       cl_abap_unit_assert=>assert_equals(
-          exp = callback_parameters
-          act = <detail>-params-t_par ).
+        exp = callback_parameters
+        act = <detail>-params-t_par ).
 
     ENDLOOP.
   ENDMETHOD.
@@ -2010,10 +2064,10 @@ CLASS ltcl_test IMPLEMENTATION.
         msgv4 = 'test'.
 
     "When
-    anon_log->add( obj_to_log = exception
+    anon_log->add( obj_to_log    = exception
                    callback_form = 'FORM'
                    callback_prog = 'PROGRAM'
-                   context =  addl_context ).
+                   context       = addl_context ).
 
     msg_handle-log_handle = anon_log->get_handle( ).
     msg_handle-msgnumber  = '000001'.

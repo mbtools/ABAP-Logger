@@ -30,7 +30,7 @@ INTERFACE zif_logger_settings PUBLIC.
   "! Set the earliest date on which the log can be deleted.
   "! By default the log does not expire.
   "!
-  "! Further information: https://launchpad.support.sap.com/#/notes/195157
+  "! Further information: https://me.sap.com/notes/195157
   METHODS set_expiry_date
     IMPORTING
       i_expiry_date TYPE aldate_del
@@ -40,7 +40,7 @@ INTERFACE zif_logger_settings PUBLIC.
   "! Set the number of days after which the log can be deleted.
   "! By default the log does not expire.
   "!
-  "! Further information: https://launchpad.support.sap.com/#/notes/195157
+  "! Further information: https://me.sap.com/notes/195157
   METHODS set_expiry_in_days
     IMPORTING
       i_num_days    TYPE i
@@ -57,7 +57,7 @@ INTERFACE zif_logger_settings PUBLIC.
   "! cannot be deleted before (in transaction SLG2).
   "! The default is false.
   "!
-  "! Further information: https://launchpad.support.sap.com/#/notes/195157
+  "! Further information: https://me.sap.com/notes/195157
   METHODS set_must_be_kept_until_expiry
     IMPORTING
       i_must_be_kept_until_expiry TYPE del_before
