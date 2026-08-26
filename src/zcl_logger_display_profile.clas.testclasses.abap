@@ -34,7 +34,7 @@ CLASS ltcl_display_profile_should IMPLEMENTATION.
       msg = |The context object must be added to the message catalogue| ).
     cl_abap_unit_assert=>assert_equals(
       act = <field>-col_pos
-      exp = 100
+      exp = 101
       msg = |Context columns must start after the standard catalogue| ).
   ENDMETHOD.
 
