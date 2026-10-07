@@ -766,7 +766,7 @@ CLASS zcl_logger IMPLEMENTATION.
           detlevel            = detlevel ).
 
       WHEN cl_abap_typedescr=>typekind_struct1     " flat structure
-        OR cl_abap_typedescr=>typekind_struct2.    " deep structure (already when string is used)
+          OR cl_abap_typedescr=>typekind_struct2.    " deep structure (already when string is used)
 
         " Predefined or other structures
         message = lcl_helper=>get_bal_message( obj_to_log ).

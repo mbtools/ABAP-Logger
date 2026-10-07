@@ -820,7 +820,7 @@ CLASS ltcl_test IMPLEMENTATION.
       msg = 'Did not log or fetch system message properly' ).
   ENDMETHOD.
 
- METHOD can_log_skwf_msg.
+  METHOD can_log_skwf_msg.
     DATA: skwf_msg         TYPE skwf_error,
           msg_handle       TYPE balmsghndl,
           expected_details TYPE bal_s_msg,
