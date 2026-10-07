@@ -194,9 +194,10 @@ CLASS zcl_logger_factory IMPLEMENTATION.
 
   METHOD create_ui.
     IF log_ui IS INITIAL.
-      CREATE OBJECT log_ui TYPE zcl_logger_ui.
+      CREATE OBJECT result TYPE zcl_logger_ui.
+    ELSE.
+      result = log_ui.
     ENDIF.
-    result = log_ui.
   ENDMETHOD.
 
 

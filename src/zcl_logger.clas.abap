@@ -717,6 +717,8 @@ CLASS zcl_logger IMPLEMENTATION.
 
     FIELD-SYMBOLS <exception> LIKE LINE OF exceptions.
 
+    result = me.
+
     CHECK obj_to_log IS NOT INITIAL.
 
     formatted_context = get_context( context ).
@@ -765,8 +767,8 @@ CLASS zcl_logger IMPLEMENTATION.
           importance          = importance
           detlevel            = detlevel ).
 
-      WHEN cl_abap_typedescr=>typekind_struct1     " flat structure
-          OR cl_abap_typedescr=>typekind_struct2.    " deep structure (already when string is used)
+      WHEN cl_abap_typedescr=>typekind_struct1 OR cl_abap_typedescr=>typekind_struct2.
+        " flat or deep structure (already when string is used)
 
         " Predefined or other structures
         message = lcl_helper=>get_bal_message( obj_to_log ).
@@ -808,8 +810,6 @@ CLASS zcl_logger IMPLEMENTATION.
     IF settings->get_autosave( ) = abap_true.
       save_log( ).
     ENDIF.
-
-    result = me.
 
   ENDMETHOD.
 
